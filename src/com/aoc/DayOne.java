@@ -58,8 +58,8 @@ public class DayOne {
 							firstNum = Character.toString(line.charAt(i));
 							firstNumFound = true;
 						}
-//					}
-//					if (!firstNumFound) {					
+					}
+					if (!firstNumFound) {					
 						/*Looking for numbers as words*/
 						do {
 							if (i + firstCounter <= line.length()) {
