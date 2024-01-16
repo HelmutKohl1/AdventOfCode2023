@@ -10,6 +10,9 @@ import java.util.HashMap;
 
 public class DayOne {
 	
+	static final String PATH = "C:\\Users\\alig6\\eclipse-workspace\\AdventOfCode2023\\res\\dayOne.txt";
+	static BufferedReader inputStream = null;
+	
 	static final Map<String, String> wordNums;
 	static {
 		wordNums = new HashMap<>();
@@ -25,11 +28,7 @@ public class DayOne {
 		}
 	}
 	
-	
-	public static void main(String[] args) throws IOException {
-		
-		final String PATH = "C:\\Users\\alig6\\eclipse-workspace\\AdventOfCode2023\\res\\dayOne.txt";
-		BufferedReader inputStream = null;
+	public static void run() throws IOException {
 		
 		try {
 			inputStream = new BufferedReader(new FileReader(PATH));		
