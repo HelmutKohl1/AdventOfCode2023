@@ -4,9 +4,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-
-import javax.print.attribute.standard.NumberUpSupported;
-
+import java.util.Map;
+import java.util.HashMap;
 import java.io.BufferedReader;
 
 public class DayTwo {
@@ -20,6 +19,8 @@ public class DayTwo {
 			numbers.add(Integer.toString(i));
 		}
 	}
+	static final int[] limits = {12, 13, 14};
+	static Map<Integer, Boolean> result = new HashMap<>();
 	
 	
 	public static void run() throws IOException {
@@ -28,9 +29,10 @@ public class DayTwo {
 			
 			String line = null;
 			int id = 0;
+			int[] maxes = {};
 			
 			while ((line = inputStream.readLine()) != null) {
-				line = line.substring(5);
+				line = line.substring(5); // Strip out 'Game: '
 				id = parseNum(line);
 				System.out.println("id " + id);
 				
@@ -47,27 +49,21 @@ public class DayTwo {
 	
 	private static int parseNum(String line) {
 		int counter = 0;
-		String testString = "";
+		String testString = "-1";
 		
-		do {
-			if (counter > line.length() - 1) {
-				testString = line.substring(0, counter);
-				System.out.println("heelo");
-				break;
-			}			
-			if (numbers.contains(testString)) {
-				return Integer.parseInt(testString);
-			}			
-		} while (isPartialNumMatch(testString));	
+		while (isWordNumber(Character.toString(line.charAt(counter)))) {
+			counter++;
+			testString = line.substring(0, counter);
+		}
 		
-		return -1;
+		return Integer.parseInt(testString);
 	}
 	
-	private static boolean isPartialNumMatch(String input) {
-		return numbers
-		.stream()
-		.filter((num) -> (num.length() <= input.length()))
-		.anyMatch((num) -> (num.startsWith(input)));
+	private static boolean isWordNumber(String input) {
+		if (input != null && input.length() > 0) {
+			return numbers.contains(input) || input.isBlank();
+		}
+		return false;
 	}
 
 }
