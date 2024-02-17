@@ -4,8 +4,11 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.ArrayList;
 import java.io.BufferedReader;
 
 public class DayTwo {
@@ -20,7 +23,7 @@ public class DayTwo {
 	}
 	static final Set<String> colours = new HashSet<>();
 	static {
-		colours.add("Red"); colours.add("Green"); colours.add("Blue");
+		colours.add("red"); colours.add("green"); colours.add("blue");
 	}
 	static enum COLOUR{
 		RED,
@@ -47,8 +50,12 @@ public class DayTwo {
 				current = line.substring(counter, counter + 1);
 				line = line.substring(5); // Strip out 'Game: '
 				id = parseNum(line);
-				System.out.println("id " + id);			
-				int[] lineMaxes = parseGame(line);			
+				System.out.println("id " + id);		
+				
+				int[] lineMaxes = parseGame(line);	
+				for (int i = 0; i < lineMaxes.length; i++) {
+					System.out.println("line maxes " + lineMaxes[i]);	
+				}
 			}
 			
 		} finally {
@@ -58,64 +65,104 @@ public class DayTwo {
 		}
 
 	}
-	
+
 	private static int[] parseGame(String line) {
-		int[] result = {};
-		
-		while (!current.equals("\n")) {			
-			int[] drawResult;
-			if (current.equals(";")) {
-				drawResult = parseDraw(line);
-			} 
+		/**Results are in format Red, Green, Blue*/
+		int[] gameMaxes = {0, 0, 0};
+		while (!peek(line).equals("\n")) {
+			int[] drawMaxes = parseDraw(line);
 			
-			if (counter < line.length()) {
-				counter++;
+			for (int i = 0; i <drawMaxes.length; i++) {
+				if (drawMaxes[i] > gameMaxes[i]) {
+					gameMaxes[i] = drawMaxes[i];
+				}
+			}
+		}
+		
+		return gameMaxes;
+	}
+	
+	private static int[] parseDraw(String line) {
+		int[] result = {0, 0, 0};
+		Map<String, Integer> localRes = new HashMap<>();
+		while (!peek(line).equals(";")) {
+			counter++;
+			int qty = parseNum(line);
+			String colour = parseColour(line);
+			localRes.put(colour, qty);
+			System.out.println("stuck");
+		}
+		
+		for (String colour : localRes.keySet()) {
+			switch (colour) {
+			case "Red":
+				result[0] = localRes.get(colour);
+				break;
+			case "Green":
+				result[1] = localRes.get(colour);
+				break;
+			case "Blue":
+				result[2] = localRes.get(colour);
+				break;
 			}
 		}
 		
 		return result;
 	}
 	
-	private static int[] parseDraw(String line) {
-		int[] drawResult = {};
-		Map<COLOUR, Integer> colorResult = new HashMap<>();
+	private static String parseColour(String line) {
+		System.out.println("parsecol");
 		
-		while (!current.equals(";") && counter < line.length()) {
-			colourResult = parseColour();
+		String testChar = line.substring(counter, counter+1);
+		System.out.println("testChar (col) " + testChar);
+		while (!isLetter(testChar)) {		
+			if(counter < line.length() - 2) counter++;
+			testChar = line.substring(counter, counter+1);
+			System.out.println("testChar (isSpace, col) " + testChar);
 		}
 		
+		int start = counter;
+		String testString = line.substring(start, counter+1);
+		System.out.println("testString (col):" + testString);
+		while (isColour(testString) && !isSpace(line.substring(counter+1, counter+2))) {
+			testString = line.substring(start, counter+2);
+			System.out.println("testString (col):" + testString);
+			if(isColour(testString) && counter < line.length() - 2) {
+				counter++;
+			} else {
+				return testString;
+			}
+			System.out.println("counter:" + counter);
+		}
 		
-		return drawResult;
+		return testString;
 	}
 	
-	private static int parseNum(String line) {
-		String testString = "-1";
-		
-		while (isWordNumber(Character.toString(line.charAt(counter)))) {
-			counter++;
-			testString = line.substring(0, counter);
+	private static int parseNum(String line){
+		System.out.println("parsenum");
+		String testChar = line.substring(counter, counter+1);
+		System.out.println("testChar:" + testChar);
+
+		while (!isWordNumber(testChar)) {		
+			if(counter < line.length() - 2) counter++;
+			testChar = line.substring(counter, counter+1);
+			System.out.println("testChar (isSpace): " + testChar);
 		}
 		
-		return Integer.parseInt(testString);
-	}
-	
-	private static Map<COLOUR, Integer> parseColour(String line){
-		Map<COLOUR, Integer> result = new HashMap<>();
-		result.put(COLOUR.RED, 0);
-		result.put(COLOUR.GREEN, 0);
-		result.put(COLOUR.BLUE, 0);
-		
-		int quantity = parseNum(line);
-		int secondCounter = counter;
-		String testString = line.substring(secondCounter, secondCounter + 1);
-		
-		while (isColour(testString)) {
-			if (secondCounter < line.length() - 1) {
-				secondCounter++;
-			}	
+		int start = counter;
+		while (isWordNumber(testChar)) {
+			System.out.println("testChar:" + testChar);
+			if(isWordNumber(line.substring(counter, counter+1)) && counter < line.length() - 2) { 
+				counter++;
+				System.out.println("counter " + counter);
+				testChar = line.substring(start, counter);
+			} else {
+				return Integer.parseInt(testChar);
+			}
+			System.out.println("testChar:" + testChar);
 		}
 		
-		return result;
+		return Integer.parseInt(testChar);
 	}
 	
 	private static boolean isWordNumber(String input) {
@@ -130,7 +177,13 @@ public class DayTwo {
 	}
 
 	private static boolean isColour(String input) {
-		return colours.stream().anyMatch(colour -> (colour.startsWith(input)));
+		return colours.stream().anyMatch((colour) -> (colour.startsWith(input)));
+	}
+	
+	private static boolean isSpace(String input) {
+		List<String> ignore = new ArrayList<>(); 
+		ignore.add(" "); ignore.add(":"); ignore.add(",");
+		return ignore.contains(input);
 	}
 	
 	private static String peek(String line) {
